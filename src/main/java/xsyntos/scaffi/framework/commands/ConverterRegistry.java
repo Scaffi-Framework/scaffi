@@ -29,7 +29,7 @@ public class ConverterRegistry {
                 try {
                     IConverter<?> converter = (IConverter<?>) cls.getDeclaredConstructor().newInstance();
                     //Get the return type of the converter
-                    Class<?> type = converter.getClass().getMethod("convert", String.class).getReturnType();
+                    Class<?> type = converter.getClass().getMethod("convert", CommandContext.class, String.class).getReturnType();
                     converters.put(type, converter);
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -11,7 +11,6 @@ import org.bukkit.entity.Entity;
 
 import xsyntos.scaffi.framework.commands.CommandContext;
 import xsyntos.scaffi.framework.commands.CommandResponse;
-import xsyntos.scaffi.framework.commands.IConverter;
 import xsyntos.scaffi.framework.configuration.Vector3;
 import xsyntos.scaffi.framework.exceptions.UnableConvertException;
 

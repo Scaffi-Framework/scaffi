@@ -7,11 +7,16 @@ import org.bukkit.command.CommandSender;
 
 import lombok.AllArgsConstructor;
 import xsyntos.scaffi.framework.ScaffiPlugin;
+import xsyntos.scaffi.framework.commands.converters.IConverter;
+import xsyntos.scaffi.framework.exceptions.CommandUsageException;
+import xsyntos.scaffi.framework.exceptions.InternalCommandException;
+import xsyntos.scaffi.framework.exceptions.UnableConvertException;
 
 import java.lang.reflect.Parameter;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
@@ -19,7 +24,7 @@ import javax.annotation.Nullable;
 @AllArgsConstructor
 public class CommandProcessor implements CommandExecutor {
     private HashMap<String, SubCommandBundle> subCommands;
-    private xsyntos.scaffi.framework.commands.Command command;
+    private xsyntos.scaffi.framework.commands.annotations.Command command;
     private Object instance;
 
     @Override
@@ -31,32 +36,61 @@ public class CommandProcessor implements CommandExecutor {
     }
 
     private CommandResponse findAndExecuteSubCommand(CommandContext context) {
+        //Validate Permissions
         if(!command.permission().isEmpty() && !context.getSender().hasPermission(command.permission())) 
             return ScaffiPlugin.config.getMessages().getNoPermissions();
-        
-        
-        if(context.getArgs().length == 0) {
-            SubCommandBundle subCommand = subCommands.get("");
-            if(subCommand != null) {
-                return executeCommand(context, subCommand);
-            } else {
-                return ScaffiPlugin.config.getMessages().getInvalidUsage();
-            }
 
+        SubCommandBundle bundle = this.findSubCommand(context);
+
+        if(bundle == null)
+            return ScaffiPlugin.config.getMessages().getInvalidUsage();
+        
+        if(bundle.isAsync()) {
+            CompletableFuture<CommandResponse> future = new CompletableFuture<>();
+            Bukkit.getScheduler().runTaskAsynchronously(ScaffiPlugin.config.getPlugin(), () -> {
+                future.complete(this.executeSubCommand(context, bundle));
+            });
+            future.thenAccept((response) -> {
+                Bukkit.getScheduler().runTask(ScaffiPlugin.config.getPlugin(), () -> response.send(context));
+            });
+            return bundle.getAsyncResponse(context);
+
+        } else {
+            return this.executeSubCommand(context, bundle);
         }
 
-        SubCommandBundle subCommand = subCommands.get(context.getArgs()[0]);
-        boolean usingDefault = subCommand == null;
-        if(usingDefault) 
-            subCommand = subCommands.get("");
+    }
 
-        if(subCommand == null) {
-            Bukkit.getLogger().warning(String.format("No command to run found!"));
+    private CommandResponse executeSubCommand(CommandContext context, SubCommandBundle bundle) {
+        try {
+            List<Object> params = this.convertParamsForSubCommand(context, bundle);
+            return this.invokeCommand(context, bundle, params);
+        } catch(CommandUsageException ex) {
+            return ex.getCommandResponse();
+        } catch(InternalCommandException ex) {
+            ex.getException().printStackTrace();
+            return ScaffiPlugin.config.getMessages().getServerError();
+        } catch (Exception ex) {
+            ex.printStackTrace();
             return ScaffiPlugin.config.getMessages().getServerError();
         }
+    }
 
+    @Nullable
+    private SubCommandBundle findSubCommand(CommandContext context) {
+        if(context.getArgs().length == 0) 
+            return subCommands.get("");
+
+        SubCommandBundle subCommand = subCommands.get(context.getArgs()[0]);
+        
+        if(subCommand == null)
+            return subCommands.get("");
+        return subCommand;
+    }
+
+    private List<Object> convertParamsForSubCommand(CommandContext context, SubCommandBundle subCommand) throws UnableConvertException, CommandUsageException {
         ArrayList<Object> params = new ArrayList<>();
-        int currentArg = usingDefault ? 0 : 1;
+        int currentArg = subCommand.isRoot() ? 0 : 1;
 
         for(int i = 1; i < subCommand.getMethod().getParameters().length; i++) {
             //get the converter for the parameter
@@ -64,8 +98,11 @@ public class CommandProcessor implements CommandExecutor {
             IConverter<?> converter = ConverterRegistry.getConverter(param.getType());
 
             if(converter == null) {
-                Bukkit.getLogger().warning(String.format("Method %s has a parameter of type %s which does not have a converter", subCommand.getMethod().getName(), param.getType().getName()));
-                return ScaffiPlugin.config.getMessages().getServerError();
+                throw new InternalCommandException(
+                    new NullPointerException(
+                        String.format("Method %s has a parameter of type %s which does not have a converter", 
+                            subCommand.getMethod().getName(), param.getType().getName()
+                )));
             }
 
             try {
@@ -84,45 +121,28 @@ public class CommandProcessor implements CommandExecutor {
                 if(param.isAnnotationPresent(Nullable.class)) {
                     params.add(null); 
                 } else {
-                    return ScaffiPlugin.config.getMessages().getInvalidUsage();
+                    throw new CommandUsageException("Missing param", ScaffiPlugin.config.getMessages().getInvalidUsage());
                 }
-            } catch (Exception e) {
-                return converter.onError(context.getArgs()[currentArg], e);
+            } catch(Exception ex) {
+                throw new CommandUsageException("Unable to convert a param!", converter.onError(context.getArgs()[currentArg], ex));
             }
         }
 
+        //Validates if there is an overflow
         if(currentArg != context.getArgs().length && (!command.allowExtraArgs() || !subCommand.getSubCommand().allowExtraArgs())) {
-            return ScaffiPlugin.config.getMessages().getInvalidUsage();
+            throw new CommandUsageException("param overflow!", ScaffiPlugin.config.getMessages().getInvalidUsage());
         }
 
-        return executeCommand(context, subCommand, params);
+        return params;
     }
 
-    private CommandResponse executeCommand(CommandContext context, SubCommandBundle bundle, List<Object> params) {
-        if(params.size() == 0)
-            return executeCommand(context, bundle);
-
+    private CommandResponse invokeCommand(CommandContext context, SubCommandBundle bundle, List<Object> params) {
         if(bundle.getSubCommand().permission().isEmpty() || context.getSender().hasPermission(bundle.getSubCommand().permission())) {
             try {
                 //add context as first parameter
                 params.add(0, context);
-
                 return (CommandResponse) bundle.getMethod().invoke(instance, params.toArray());
-            } catch (Exception e) {
-                e.printStackTrace();
-                return ScaffiPlugin.config.getMessages().getServerError();
-            }
-        } else {
-            return ScaffiPlugin.config.getMessages().getNoPermissions();
-        }
-
-    }
-
-
-    private CommandResponse executeCommand(CommandContext context, SubCommandBundle bundle) {
-        if(bundle.getSubCommand().permission().isEmpty() || context.getSender().hasPermission(bundle.getSubCommand().permission())) {
-            try {
-                return (CommandResponse) bundle.getMethod().invoke(instance, context);
+                
             } catch (Exception e) {
                 e.printStackTrace();
                 return ScaffiPlugin.config.getMessages().getServerError();
@@ -131,5 +151,4 @@ public class CommandProcessor implements CommandExecutor {
             return ScaffiPlugin.config.getMessages().getNoPermissions();
         }
     }
-
 }

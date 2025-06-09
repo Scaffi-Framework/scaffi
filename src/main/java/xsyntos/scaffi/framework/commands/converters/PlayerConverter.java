@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 
 import xsyntos.scaffi.framework.commands.CommandContext;
 import xsyntos.scaffi.framework.commands.CommandResponse;
-import xsyntos.scaffi.framework.commands.IConverter;
 import xsyntos.scaffi.framework.exceptions.UnableConvertException;
 
 /**

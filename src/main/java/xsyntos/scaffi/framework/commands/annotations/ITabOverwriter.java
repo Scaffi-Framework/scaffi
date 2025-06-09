@@ -1,6 +1,8 @@
-package xsyntos.scaffi.framework.commands;
+package xsyntos.scaffi.framework.commands.annotations;
 
 import java.util.List;
+
+import xsyntos.scaffi.framework.commands.CommandContext;
 
 /**
  * The input for the TabOverwrite annotation

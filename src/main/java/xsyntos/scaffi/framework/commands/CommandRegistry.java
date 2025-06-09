@@ -12,6 +12,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.google.common.reflect.ClassPath;
 import java.lang.reflect.Parameter;
 
+import xsyntos.scaffi.framework.commands.annotations.Command;
+import xsyntos.scaffi.framework.commands.annotations.SubCommand;
 import xsyntos.scaffi.framework.exceptions.ScaffiStartupError;
 
 public class CommandRegistry {

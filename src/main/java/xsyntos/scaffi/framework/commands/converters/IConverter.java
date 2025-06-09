@@ -1,6 +1,9 @@
-package xsyntos.scaffi.framework.commands;
+package xsyntos.scaffi.framework.commands.converters;
 
 import java.util.List;
+
+import xsyntos.scaffi.framework.commands.CommandContext;
+import xsyntos.scaffi.framework.commands.CommandResponse;
 
 /**
  * Converts raw input from Minecraft to Java classes

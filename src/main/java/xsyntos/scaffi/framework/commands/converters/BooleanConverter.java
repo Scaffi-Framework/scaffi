@@ -7,7 +7,6 @@ import org.bukkit.Sound;
 
 import xsyntos.scaffi.framework.commands.CommandContext;
 import xsyntos.scaffi.framework.commands.CommandResponse;
-import xsyntos.scaffi.framework.commands.IConverter;
 
 
 /**

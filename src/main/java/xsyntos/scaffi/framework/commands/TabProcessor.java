@@ -11,11 +11,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import lombok.AllArgsConstructor;
+import xsyntos.scaffi.framework.commands.annotations.TabOverwrite;
+import xsyntos.scaffi.framework.commands.converters.IConverter;
 
 @AllArgsConstructor
 class TabProcessor implements TabCompleter {
     private HashMap<String, SubCommandBundle> subCommands;
-    private xsyntos.scaffi.framework.commands.Command command;
+    private xsyntos.scaffi.framework.commands.annotations.Command command;
 
     @Override
     public List<String> onTabComplete(CommandSender arg0, org.bukkit.command.Command arg1, String arg2, String[] arg3) {

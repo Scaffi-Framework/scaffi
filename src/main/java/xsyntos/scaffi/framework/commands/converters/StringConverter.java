@@ -5,7 +5,6 @@ import java.util.Collections;
 
 import xsyntos.scaffi.framework.commands.CommandContext;
 import xsyntos.scaffi.framework.commands.CommandResponse;
-import xsyntos.scaffi.framework.commands.IConverter;
 
 /**
  * The default converter for Strings
