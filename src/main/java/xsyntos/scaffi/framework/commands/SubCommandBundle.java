@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-class SubCommandBundle {
+public class SubCommandBundle {
     private SubCommand subCommand;
     private Method method;
 }

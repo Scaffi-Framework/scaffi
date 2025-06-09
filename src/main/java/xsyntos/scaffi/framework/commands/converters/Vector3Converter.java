@@ -21,7 +21,7 @@ import xsyntos.scaffi.framework.exceptions.UnableConvertException;
 public class Vector3Converter implements IConverter<Vector3> {
 
     @Override
-    public Vector3 convert(String value) {
+    public Vector3 convert(CommandContext context, String value) {
         String[] values = value.split(" ");
         if(values.length != 3)
             throw new UnableConvertException("Unable to convert " + value + " to a blockpos");
@@ -69,7 +69,7 @@ public class Vector3Converter implements IConverter<Vector3> {
     }
 
     @Override
-    public CommandResponse onError(String value) {
+    public CommandResponse onError(String value, Exception ex) {
         return CommandResponse.builder()
             .message(ChatColor.RED + value + " is not a valid blockpos!")
             .sound(Sound.BLOCK_NOTE_BLOCK_BASS)

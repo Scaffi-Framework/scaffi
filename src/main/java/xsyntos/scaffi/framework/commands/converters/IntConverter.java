@@ -17,7 +17,7 @@ import xsyntos.scaffi.framework.exceptions.UnableConvertException;
  */
 public class IntConverter implements IConverter<Integer> {
     @Override
-    public Integer convert(String value) {
+    public Integer convert(CommandContext context, String value) {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
@@ -36,7 +36,7 @@ public class IntConverter implements IConverter<Integer> {
     }
 
     @Override
-    public CommandResponse onError(String value) {
+    public CommandResponse onError(String value, Exception ex) {
         return CommandResponse.builder()
             .message(ChatColor.RED + value + " is not a valid number!")
             .sound(Sound.BLOCK_NOTE_BLOCK_BASS)

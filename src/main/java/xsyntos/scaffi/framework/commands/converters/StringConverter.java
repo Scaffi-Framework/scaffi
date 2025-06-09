@@ -12,7 +12,7 @@ import xsyntos.scaffi.framework.commands.IConverter;
  */
 public class StringConverter implements IConverter<String> {
     @Override
-    public String convert(String value) {
+    public String convert(CommandContext context, String value) {
         return value;
     }
     
@@ -27,7 +27,7 @@ public class StringConverter implements IConverter<String> {
     }
 
     @Override
-    public CommandResponse onError(String value) {
+    public CommandResponse onError(String value, Exception ex) {
         return CommandResponse.builder()
             .message(value + " is not a valid string!")
             .build();

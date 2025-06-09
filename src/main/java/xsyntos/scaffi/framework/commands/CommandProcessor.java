@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import javax.annotation.Nullable;
 
 @AllArgsConstructor
-class CommandProcessor implements CommandExecutor {
+public class CommandProcessor implements CommandExecutor {
     private HashMap<String, SubCommandBundle> subCommands;
     private xsyntos.scaffi.framework.commands.Command command;
     private Object instance;
@@ -70,13 +70,13 @@ class CommandProcessor implements CommandExecutor {
 
             try {
                 if(converter.getSize() == 1) {
-                    params.add(converter.convert(context.getArgs()[currentArg]));
+                    params.add(converter.convert(context, context.getArgs()[currentArg]));
                 } else {
                     String value = "";
                     for(int j = 0; j < converter.getSize(); j++) {
                         value += context.getArgs()[currentArg + j] + " ";
                     }
-                    params.add(converter.convert(value.trim()));
+                    params.add(converter.convert(context, value.trim()));
                 }
 
                 currentArg += converter.getSize();
@@ -87,7 +87,7 @@ class CommandProcessor implements CommandExecutor {
                     return ScaffiPlugin.config.getMessages().getInvalidUsage();
                 }
             } catch (Exception e) {
-                return converter.onError(context.getArgs()[currentArg]);
+                return converter.onError(context.getArgs()[currentArg], e);
             }
         }
 

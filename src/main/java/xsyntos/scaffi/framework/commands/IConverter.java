@@ -11,7 +11,7 @@ public interface IConverter<T> {
      * @param value In case of a multi-param input (size > 1), the different params are seperated by a space (' ')
      * @return
      */
-    T convert(String value);
+    T convert(CommandContext context, String value);
 
     /**
      * The amount of Command params it uses for the converter.
@@ -33,5 +33,5 @@ public interface IConverter<T> {
      * @param value
      * @return
      */
-    CommandResponse onError(String value);
+    CommandResponse onError(String value, Exception ex);
 }

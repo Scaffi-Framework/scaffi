@@ -16,7 +16,7 @@ import xsyntos.scaffi.framework.exceptions.UnableConvertException;
  */
 public class PlayerConverter implements IConverter<Player> {
     @Override
-    public Player convert(String value) {
+    public Player convert(CommandContext context, String value) {
         Player p = Bukkit.getServer().getPlayer(value);
         if (p != null) {
             return p;
@@ -36,7 +36,7 @@ public class PlayerConverter implements IConverter<Player> {
     }
 
     @Override
-    public CommandResponse onError(String value) {
+    public CommandResponse onError(String value, Exception ex) {
         return CommandResponse.builder()
             .message(value + " is not a valid player!")
             .sound(Sound.BLOCK_NOTE_BLOCK_BASS)

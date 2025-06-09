@@ -40,7 +40,8 @@ class TabProcessor implements TabCompleter {
         if(usingDefault) 
             subCommand = subCommands.get("");
 
-        list.addAll(executeTabComplete(context, subCommand, usingDefault));
+        if(subCommand != null)
+            list.addAll(executeTabComplete(context, subCommand, usingDefault));
 
         if(context.getArgs().length == 1) {
             list.addAll(subCommands.keySet());
