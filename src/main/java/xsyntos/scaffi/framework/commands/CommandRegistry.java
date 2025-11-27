@@ -14,7 +14,9 @@ import java.lang.reflect.Parameter;
 
 import xsyntos.scaffi.framework.commands.annotations.Command;
 import xsyntos.scaffi.framework.commands.annotations.SubCommand;
+import xsyntos.scaffi.framework.commands.processors.CommandProcessor;
 import xsyntos.scaffi.framework.exceptions.ScaffiStartupError;
+import xsyntos.scaffi.framework.commands.processors.TabProcessor;
 
 public class CommandRegistry {
     public static void registerCommands(JavaPlugin plugin) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
@@ -27,7 +29,7 @@ public class CommandRegistry {
             Class<?> cls = info.load();
             if(cls.isAnnotationPresent(Command.class)) {
                 Command command = cls.getAnnotation(Command.class);
-                HashMap<String, SubCommandBundle> subCommands = collectSubCommands(cls);
+                HashMap<String, SubCommandBundle> subCommands = collectSubCommands(cls, false);
                 PluginCommand plCommand = plugin.getCommand(command.command());
                 plCommand.setExecutor(new CommandProcessor(subCommands, command, cls.getDeclaredConstructor().newInstance()));
                 plCommand.setTabCompleter(new TabProcessor(subCommands, command));
@@ -35,7 +37,7 @@ public class CommandRegistry {
         }
     }
     
-    public static HashMap<String, SubCommandBundle> collectSubCommands(Class<?> clazz) {
+    public static HashMap<String, SubCommandBundle> collectSubCommands(Class<?> clazz, boolean silent) {
         HashMap<String, SubCommandBundle> subCommands = new HashMap<>();
 
         for(Method method : clazz.getMethods()) {
@@ -57,7 +59,8 @@ public class CommandRegistry {
                 }
 
             } catch (ScaffiStartupError e) {
-                e.printStackTrace();
+                if(!silent)
+                    e.printStackTrace();
             }
         }
         return subCommands;

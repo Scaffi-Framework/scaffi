@@ -33,6 +33,17 @@
 		    <version>1.18.34</version>
 		    <scope>provided</scope>
 	    </dependency>
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>1.0-rc2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup</groupId>
+            <artifactId>javapoet</artifactId>
+            <version>1.10.0</version>
+        </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -47,4 +58,5 @@
         </plugin>
     </plugins>
 </build>
+
 </project>

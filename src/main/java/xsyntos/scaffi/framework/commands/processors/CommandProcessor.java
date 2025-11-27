@@ -1,4 +1,4 @@
-package xsyntos.scaffi.framework.commands;
+package xsyntos.scaffi.framework.commands.processors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -7,6 +7,10 @@ import org.bukkit.command.CommandSender;
 
 import lombok.AllArgsConstructor;
 import xsyntos.scaffi.framework.ScaffiPlugin;
+import xsyntos.scaffi.framework.commands.CommandContext;
+import xsyntos.scaffi.framework.commands.CommandResponse;
+import xsyntos.scaffi.framework.commands.ConverterRegistry;
+import xsyntos.scaffi.framework.commands.SubCommandBundle;
 import xsyntos.scaffi.framework.commands.converters.IConverter;
 import xsyntos.scaffi.framework.exceptions.CommandUsageException;
 import xsyntos.scaffi.framework.exceptions.InternalCommandException;

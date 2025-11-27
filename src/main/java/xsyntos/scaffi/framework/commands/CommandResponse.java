@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 
 import lombok.Builder;
 import lombok.Data;
+import net.md_5.bungee.api.chat.BaseComponent;
 
 /**
  * The expected result of a Scaffi-based Minecraft Command
@@ -24,10 +25,16 @@ public class CommandResponse {
      */
     private Sound sound;
 
+    private BaseComponent component;
+
     public void send(CommandContext context) {
         if (message != null) 
             context.getSender().sendMessage(message);
         
+        if(component != null) 
+            context.getSender().spigot().sendMessage(component);
+        
+
         if(context.getSender() instanceof Player player) {
             if(sound != null) {
                 player.playSound(player.getLocation(), sound, 1, 1);

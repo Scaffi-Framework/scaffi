@@ -20,7 +20,7 @@ public @interface Command {
     /**
      * Aliases of the command. These can be used instead of the command-name
      */
-    String[] alias() default "";
+    String[] aliases() default "";
 
     /**
      * The permission of the command. If not set, the command evoker doesn't need permissions.
