@@ -1,4 +1,11 @@
 
+name: Build
+
+on:
+  pull_request:
+    branches: [ "main", "feature/CICD", "development" ]
+  workflow_call:
+
 jobs:
   # Single deploy job since we're just deploying
   build:

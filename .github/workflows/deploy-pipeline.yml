@@ -1,10 +1,10 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: Deploy
 
-# on:
-#   # Runs on pushes targeting the default branch
-#   push:
-#     branches: ["main"]
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
 
 #   # Allows you to run this workflow manually from the Actions tab
 #   workflow_dispatch:
@@ -20,10 +20,10 @@ permissions:
 concurrency:
   group: "pages"
   cancel-in-progress: false
-
 jobs:
-  # Single deploy job since we're just deploying
-  deploy-github-pages:
+  build:
+    uses: Scaffi-Framework/scaffi/.github/workflows/build-pipeline.yml@main
+  deploy-maven:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -39,6 +39,16 @@ jobs:
           java-version: '21.0.2'
           distribution: 'oracle'
           cache: 'maven'
+      - name: 🍵Publish package
+        run: mvn --batch-mode deploy
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+    deploy-github-pages:
+      - name: 📦Download build artificat
+        uses: actions/download-artifact@v3
+        with:
+          name: scaffi-framework-build
       - name: 🔨Build with Maven
         run: mvn javadoc:javadoc
           
