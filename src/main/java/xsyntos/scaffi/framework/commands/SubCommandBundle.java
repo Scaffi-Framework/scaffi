@@ -1,6 +1,7 @@
 package xsyntos.scaffi.framework.commands;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,5 +31,13 @@ public class SubCommandBundle {
             e.printStackTrace();
             throw new InternalCommandException(e);
         }
+    }
+
+    public CommandResponse invoke(Object instance, Object... params) throws Exception {
+        return (CommandResponse) method.invoke(instance, params);
+    }
+
+    public Parameter[] getParameters() {
+        return method.getParameters();
     }
 }

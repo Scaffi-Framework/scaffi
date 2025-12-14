@@ -1,18 +1,22 @@
 package xsyntos.scaffi.framework.commands;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.annotation.Nullable;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.google.common.reflect.ClassPath;
 import java.lang.reflect.Parameter;
 
 import xsyntos.scaffi.framework.commands.annotations.Command;
+import xsyntos.scaffi.framework.commands.annotations.HelpCommand;
 import xsyntos.scaffi.framework.commands.annotations.SubCommand;
 import xsyntos.scaffi.framework.commands.processors.CommandProcessor;
 import xsyntos.scaffi.framework.exceptions.ScaffiStartupError;
@@ -29,7 +33,7 @@ public class CommandRegistry {
             Class<?> cls = info.load();
             if(cls.isAnnotationPresent(Command.class)) {
                 Command command = cls.getAnnotation(Command.class);
-                HashMap<String, SubCommandBundle> subCommands = collectSubCommands(cls, false);
+                HashMap<String, SubCommandBundle> subCommands = collectSubCommands(command.command(), cls, false);
                 PluginCommand plCommand = plugin.getCommand(command.command());
                 plCommand.setExecutor(new CommandProcessor(subCommands, command, cls.getDeclaredConstructor().newInstance()));
                 plCommand.setTabCompleter(new TabProcessor(subCommands, command));
@@ -37,7 +41,7 @@ public class CommandRegistry {
         }
     }
     
-    public static HashMap<String, SubCommandBundle> collectSubCommands(Class<?> clazz, boolean silent) {
+    public static HashMap<String, SubCommandBundle> collectSubCommands(String Command, Class<?> clazz, boolean silent) {
         HashMap<String, SubCommandBundle> subCommands = new HashMap<>();
 
         for(Method method : clazz.getMethods()) {
@@ -63,6 +67,12 @@ public class CommandRegistry {
                     e.printStackTrace();
             }
         }
+        
+        if(clazz.isAnnotationPresent(HelpCommand.class)) {
+            Bukkit.getLogger().info("Registering help command for " + Command);
+            subCommands.put("help", generateHelp(Command, clazz.getAnnotation(HelpCommand.class), subCommands));
+        }
+
         return subCommands;
     }
 
@@ -95,6 +105,41 @@ public class CommandRegistry {
 
         }
     }
-    
+
+    private static SubCommandBundle generateHelp(String command, HelpCommand helpCommand, HashMap<String, SubCommandBundle> subCommands) {
+        SubCommand helpSubCommand = new SubCommand() {
+            @Override
+            public String command() {
+                return "help";
+            }
+
+            @Override
+            public String description() {
+                return "Displays help information";
+            }
+
+            @Override
+            public String[] aliases() {
+                return new String[0];
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return SubCommand.class;
+            }
+
+            @Override
+            public String permission() {
+                return "";
+            }
+
+            @Override
+            public boolean allowExtraArgs() {
+                return false;
+            }
+        };
+
+        return new HelpCommandBundle(command, helpCommand, helpSubCommand, subCommands);
+    }
 }
 

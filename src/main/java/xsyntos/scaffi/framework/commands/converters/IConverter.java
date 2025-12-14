@@ -37,4 +37,17 @@ public interface IConverter<T> {
      * @return
      */
     CommandResponse onError(String value, Exception ex);
+
+    /**
+     * Get the type name of the converter for help commands
+     * @return
+     */
+    default String getTypeName() {
+        try {
+            return this.getClass().getMethod("convert", CommandContext.class, String.class).getReturnType().getSimpleName();
+        } catch (NoSuchMethodException | SecurityException e) {
+            e.printStackTrace();
+            return "Unknown";
+        }
+    }
 }

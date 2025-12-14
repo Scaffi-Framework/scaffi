@@ -59,9 +59,9 @@ public class TabProcessor implements TabCompleter {
     private List<String> executeTabComplete(CommandContext context, SubCommandBundle subCommand, boolean usingDefault) {
         int currentArg = usingDefault ? 0 : 1;
 
-        for(int i = 1; i < subCommand.getMethod().getParameters().length; i++) {
+        for(int i = 1; i < subCommand.getParameters().length; i++) {
             //get the converter for the parameter
-            Parameter param = subCommand.getMethod().getParameters()[i];
+            Parameter param = subCommand.getParameters()[i];
             IConverter<?> converter = ConverterRegistry.getConverter(param.getType());
 
             if(converter == null) {

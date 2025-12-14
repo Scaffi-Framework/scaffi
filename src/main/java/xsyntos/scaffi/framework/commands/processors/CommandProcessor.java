@@ -145,8 +145,7 @@ public class CommandProcessor implements CommandExecutor {
             try {
                 //add context as first parameter
                 params.add(0, context);
-                return (CommandResponse) bundle.getMethod().invoke(instance, params.toArray());
-                
+                return (CommandResponse) bundle.invoke(instance, params.toArray());
             } catch (Exception e) {
                 e.printStackTrace();
                 return ScaffiPlugin.config.getMessages().getServerError();
