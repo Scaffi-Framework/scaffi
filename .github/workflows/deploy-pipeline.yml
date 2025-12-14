@@ -42,6 +42,9 @@ jobs:
         with:
           java-version: '21.0.2'
           distribution: 'oracle'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
           cache: 'maven'
       - name: 🍵Publish package
         run: mvn --batch-mode deploy
