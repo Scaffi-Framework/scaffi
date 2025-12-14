@@ -6,13 +6,14 @@
 
   <groupId>xsyntos.scaffi</groupId>
   <artifactId>framework</artifactId>
-  <version>0.1.0-${MINECRAFT_VERION}</version>
+  <version>${revision}</version>
 
   <packaging>jar</packaging>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
+    <revision>0.1.0-${MINECRAFT_VERSION}</revision>
     <MINECRAFT_VERSION>1.21.4</MINECRAFT_VERSION>
   </properties>
   <repositories>
