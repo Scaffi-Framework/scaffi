@@ -32,6 +32,7 @@ jobs:
       MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       GPG_KEYID: ${{ secrets.GPG_KEYID }}
+      MAVEN_SERVER: central
     strategy:
       matrix:
         MINECRAFT_VERSION: [ "1.21.11"]
