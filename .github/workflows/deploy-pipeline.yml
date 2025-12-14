@@ -48,6 +48,9 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
           cache: 'maven'
+      - name: Show Maven servers
+        run: |
+          sed 's/<password>.*<\/password>/<password>***<\/password>/' ~/.m2/settings.xml
       - name: 🍵Publish package
         run: mvn --batch-mode deploy
         env:
