@@ -27,6 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment: production
+    env:
+      MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+      MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      GPG_KEYID: ${{ secrets.GPG_KEYID }}
     strategy:
       matrix:
         MINECRAFT_VERSION: [ "1.21.11", "1.21.10", "1.20.6", "1.19.4" ]
@@ -47,17 +52,12 @@ jobs:
           server-password: MAVEN_PASSWORD
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
-          cache: 'maven'
+          cache: 'maven-with-dependencies'
       - name: Show Maven servers
         run: |
           sed 's/<password>.*<\/password>/<password>***<\/password>/' ~/.m2/settings.xml
       - name: 🍵Publish package
         run: mvn --batch-mode deploy
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          GPG_KEYID: ${{ secrets.GPG_KEYID }}
 
   deploy-github-pages:
     needs: build
