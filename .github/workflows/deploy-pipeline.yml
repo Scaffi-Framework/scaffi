@@ -57,6 +57,9 @@ jobs:
           java-version: '21.0.2'
           distribution: 'oracle'
           cache: 'maven'
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_SERVER: central
       - name: print mvn settings
         run: cat ~/.m2/settings.xml
       - name: 🍵Publish package
