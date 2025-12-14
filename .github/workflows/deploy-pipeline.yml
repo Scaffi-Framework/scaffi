@@ -46,6 +46,10 @@ jobs:
         run: |
           echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
           gpg --list-secret-keys --keyid-format=long
+      - name: Configure GPG for batch mode
+        run: |
+          echo "use-agent" >> ~/.gnupg/gpg.conf
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
       - name: 🍵Set up JDK 21
         uses: actions/setup-java@v3
         with:
@@ -53,7 +57,7 @@ jobs:
           distribution: 'oracle'
           cache: 'maven'
       - name: 🍵Publish package
-        run: mvn --batch-mode deploy
+        run: mvn --batch-mode deploy -Dgpg.passphrase="${GPG_PASSPHRASE}"
 
   deploy-github-pages:
     needs: build
