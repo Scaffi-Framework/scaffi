@@ -52,7 +52,7 @@ jobs:
           server-password: MAVEN_PASSWORD
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
-          cache: 'maven-with-dependencies'
+          cache: 'maven'
       - name: Show Maven servers
         run: |
           sed 's/<password>.*<\/password>/<password>***<\/password>/' ~/.m2/settings.xml
