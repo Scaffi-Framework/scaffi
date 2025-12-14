@@ -15,6 +15,7 @@
     <maven.compiler.target>21</maven.compiler.target>
     <revision>0.1.0-${MINECRAFT_VERSION}</revision>
     <MINECRAFT_VERSION>1.21.4</MINECRAFT_VERSION>
+    <gpg.keyname>${GPG_KEYID}</gpg.keyname>
   </properties>
   <repositories>
       <repository>
@@ -69,6 +70,12 @@
               <goals>
                 <goal>sign</goal>
               </goals>
+              <configuration>
+                <gpgArguments>
+                  <arg>--pinentry-mode</arg>
+                  <arg>loopback</arg>
+                </gpgArguments>
+              </configuration>
             </execution>
           </executions>
         </plugin>
