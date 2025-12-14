@@ -6,13 +6,14 @@
 
   <groupId>xsyntos.scaffi</groupId>
   <artifactId>framework</artifactId>
-  <version>0.1.0-1.21</version>
+  <version>0.1.0-${MINECRAFT_VERION}</version>
 
   <packaging>jar</packaging>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
+    <MINECRAFT_VERSION>1.21.4</MINECRAFT_VERSION>
   </properties>
   <repositories>
       <repository>
@@ -24,7 +25,7 @@
       <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.21.4-R0.1-SNAPSHOT</version>
+            <version>${MINECRAFT_VERSION}-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
       </dependency>
       <dependency>
