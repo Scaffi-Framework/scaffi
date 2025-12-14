@@ -6,7 +6,7 @@
 
   <groupId>xsyntos.scaffi</groupId>
   <artifactId>framework</artifactId>
-  <version>3.0</version>
+  <version>0.1.0-1.21</version>
 
   <packaging>jar</packaging>
   <properties>
@@ -58,5 +58,11 @@
         </plugin>
     </plugins>
 </build>
-
+  <distributionManagement>
+    <repository>
+      <id>ossrh</id>
+      <name>Central Repository OSSRH</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 </project>

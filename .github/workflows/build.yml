@@ -1,0 +1,21 @@
+
+jobs:
+  # Single deploy job since we're just deploying
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: 🍵Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21.0.2'
+          distribution: 'oracle'
+          cache: 'maven'
+      - name: 🔨Build with Maven
+        run: mvn clean package
+      - name: 📦Publish artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: scaffi-framework-build
+        
