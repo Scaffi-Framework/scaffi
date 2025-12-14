@@ -51,14 +51,14 @@ jobs:
         run: |
           echo "use-agent" >> ~/.gnupg/gpg.conf
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-      - name: print mvn settings
-        run: cat ~/.m2/settings.xml
       - name: 🍵Set up JDK 21
         uses: actions/setup-java@v3
         with:
           java-version: '21.0.2'
           distribution: 'oracle'
           cache: 'maven'
+      - name: print mvn settings
+        run: cat ~/.m2/settings.xml
       - name: 🍵Publish package
         run: mvn --batch-mode deploy -Dgpg.passphrase="${GPG_PASSPHRASE}"
 
