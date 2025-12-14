@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.ArrayList;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 @AllArgsConstructor
 public class CommandProcessor implements CommandExecutor {
