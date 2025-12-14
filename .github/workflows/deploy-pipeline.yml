@@ -44,7 +44,7 @@ jobs:
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-    deploy-github-pages:
+  deploy-github-pages:
       - name: 📦Download build artificat
         uses: actions/download-artifact@v3
         with:
