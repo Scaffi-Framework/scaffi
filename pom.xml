@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <name>framework</name>
+  <name>Scaffi-Framework</name>
   <description>A framework for minecraft-plugins</description>
   <url>https://xsyntos.gitbook.io/scaffi/</url>
   <licenses>
@@ -39,7 +39,6 @@
     <MINECRAFT_VERSION>1.21.11</MINECRAFT_VERSION>
     <MINECRAFT_TIMESTAMP>20251212.220009-4</MINECRAFT_TIMESTAMP>
     <gpg.keyname>CBF9D0731D9AFA8F45821F858236D7A25C0CCC62</gpg.keyname>
-    <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
   </properties>
   <repositories>
       <repository>
@@ -126,6 +125,7 @@
           <extensions>true</extensions>
           <configuration>
             <publishingServerId>central</publishingServerId>
+            <autoPublish>true</autoPublish>
           </configuration>
         </plugin>
     </plugins>
