@@ -11,6 +11,7 @@ import nl.xsyntos.scaffi.framework.commands.CommandContext;
 import nl.xsyntos.scaffi.framework.commands.CommandResponse;
 import nl.xsyntos.scaffi.framework.commands.ConverterRegistry;
 import nl.xsyntos.scaffi.framework.commands.SubCommandBundle;
+import nl.xsyntos.scaffi.framework.commands.annotations.CommandNullable;
 import nl.xsyntos.scaffi.framework.commands.converters.IConverter;
 import nl.xsyntos.scaffi.framework.exceptions.CommandUsageException;
 import nl.xsyntos.scaffi.framework.exceptions.InternalCommandException;
@@ -22,6 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -122,7 +126,7 @@ public class CommandProcessor implements CommandExecutor {
 
                 currentArg += converter.getSize();
             } catch (ArrayIndexOutOfBoundsException e) {
-                if(param.isAnnotationPresent(Nullable.class)) {
+                if(param.isAnnotationPresent(CommandNullable.class)) {
                     params.add(null); 
                 } else {
                     throw new CommandUsageException("Missing param", ScaffiPlugin.config.getMessages().getInvalidUsage());

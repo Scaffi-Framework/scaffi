@@ -3,6 +3,7 @@ package nl.xsyntos.scaffi.framework.commands;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -12,6 +13,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
  */
 @Data
 @Builder
+@AllArgsConstructor
 public class CommandResponse {
     /**
      * The message that will be send to the commandsender after the command completion
