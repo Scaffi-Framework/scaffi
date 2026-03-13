@@ -9,6 +9,7 @@ import java.util.HashMap;
 import org.jetbrains.annotations.Nullable;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.google.common.reflect.ClassPath;
@@ -136,6 +137,11 @@ public class CommandRegistry {
             @Override
             public boolean allowExtraArgs() {
                 return false;
+            }
+
+            @Override
+            public Class<? extends CommandSender>[] executorWhitelist() {
+                return new Class[] {CommandSender.class};
             }
         };
 

@@ -23,9 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +49,10 @@ public class CommandProcessor implements CommandExecutor {
 
         if(bundle == null)
             return ScaffiPlugin.config.getMessages().getInvalidUsage();
-        
+
+        if(!bundle.executorAllowed(context.getSender()))
+            return ScaffiPlugin.config.getMessages().getExecutorNotAllowed();
+
         if(bundle.isAsync()) {
             CompletableFuture<CommandResponse> future = new CompletableFuture<>();
             Bukkit.getScheduler().runTaskAsynchronously(ScaffiPlugin.config.getPlugin(), () -> {

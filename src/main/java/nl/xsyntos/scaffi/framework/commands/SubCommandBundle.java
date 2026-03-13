@@ -3,6 +3,8 @@ package nl.xsyntos.scaffi.framework.commands;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+import org.bukkit.command.CommandSender;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import nl.xsyntos.scaffi.framework.commands.annotations.Async;
@@ -39,5 +41,13 @@ public class SubCommandBundle {
 
     public Parameter[] getParameters() {
         return method.getParameters();
+    }
+
+    public boolean executorAllowed(CommandSender sender) {
+        for(Class<? extends CommandSender> clazz : subCommand.executorWhitelist()) {
+            if(clazz.isInstance(sender))
+                return true;
+        }
+        return false;
     }
 }

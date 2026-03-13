@@ -30,4 +30,9 @@ public class Messages {
         .build();
 
 
+    private CommandResponse executorNotAllowed = 
+    CommandResponse.builder()
+        .message(ChatColor.RED + "You are not allowed to execute this command.")
+        .sound(Sound.BLOCK_NOTE_BLOCK_BASS)
+        .build();
 }
