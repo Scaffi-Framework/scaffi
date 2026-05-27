@@ -50,4 +50,13 @@ public class SubCommandBundle {
         }
         return false;
     }
+
+    public CommandResponse getErrorResponse(CommandContext context) {
+        try {
+            return subCommand.errorResponse().getConstructor().newInstance().response(context);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new InternalCommandException(e);
+        }
+    }
 }

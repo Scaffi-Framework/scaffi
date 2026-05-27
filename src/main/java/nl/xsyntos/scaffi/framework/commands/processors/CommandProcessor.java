@@ -152,7 +152,7 @@ public class CommandProcessor implements CommandExecutor {
                 return (CommandResponse) bundle.invoke(instance, params.toArray());
             } catch (Exception e) {
                 e.printStackTrace();
-                return ScaffiPlugin.config.getMessages().getServerError();
+                return bundle.getErrorResponse(context);
             }
         } else {
             return ScaffiPlugin.config.getMessages().getNoPermissions();

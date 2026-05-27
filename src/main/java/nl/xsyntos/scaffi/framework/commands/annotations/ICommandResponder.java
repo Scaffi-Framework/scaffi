@@ -4,9 +4,9 @@ import nl.xsyntos.scaffi.framework.commands.CommandContext;
 import nl.xsyntos.scaffi.framework.commands.CommandResponse;
 
 /**
- * A Function that returns the temporary CommandResponse while the command is executing
+ * A funtional interface that creates a command reponse.
  */
 @FunctionalInterface
-public interface ICommandAsync {
+public interface ICommandResponder {
     public CommandResponse response(CommandContext context);
 }

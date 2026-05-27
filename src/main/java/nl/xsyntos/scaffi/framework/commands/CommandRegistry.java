@@ -15,7 +15,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.google.common.reflect.ClassPath;
 
 import nl.xsyntos.scaffi.framework.commands.annotations.Command;
+import nl.xsyntos.scaffi.framework.commands.annotations.DefaultErrorResponder;
 import nl.xsyntos.scaffi.framework.commands.annotations.HelpCommand;
+import nl.xsyntos.scaffi.framework.commands.annotations.ICommandResponder;
 import nl.xsyntos.scaffi.framework.commands.annotations.SubCommand;
 import nl.xsyntos.scaffi.framework.commands.processors.CommandProcessor;
 import nl.xsyntos.scaffi.framework.commands.processors.TabProcessor;
@@ -142,6 +144,11 @@ public class CommandRegistry {
             @Override
             public Class<? extends CommandSender>[] executorWhitelist() {
                 return new Class[] {CommandSender.class};
+            }
+
+            @Override
+            public Class<? extends ICommandResponder> errorResponse() {
+                return DefaultErrorResponder.class;
             }
         };
 

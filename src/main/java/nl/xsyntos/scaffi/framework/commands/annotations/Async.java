@@ -11,5 +11,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME) 
 @Target(ElementType.METHOD)
 public @interface Async {
-    Class<? extends ICommandAsync> value() default EmptyCommandAsync.class;
+    Class<? extends ICommandResponder> value() default EmptyCommandAsync.class;
 }

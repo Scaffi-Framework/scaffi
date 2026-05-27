@@ -3,7 +3,7 @@ package nl.xsyntos.scaffi.framework.commands.annotations;
 import nl.xsyntos.scaffi.framework.commands.CommandContext;
 import nl.xsyntos.scaffi.framework.commands.CommandResponse;
 
-public class EmptyCommandAsync implements ICommandAsync {
+public class EmptyCommandAsync implements ICommandResponder {
 
     @Override
     public CommandResponse response(CommandContext context) {
