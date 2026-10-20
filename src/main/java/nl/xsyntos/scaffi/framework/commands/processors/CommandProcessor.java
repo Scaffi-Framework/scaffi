@@ -54,9 +54,11 @@ public class CommandProcessor implements CommandExecutor {
             Bukkit.getScheduler().runTaskAsynchronously(ScaffiPlugin.config.getPlugin(), () -> {
                 future.complete(this.executeSubCommand(context, bundle));
             });
+
             future.thenAccept((response) -> {
                 Bukkit.getScheduler().runTask(ScaffiPlugin.config.getPlugin(), () -> response.send(context));
             });
+            
             return bundle.getAsyncResponse(context);
 
         } else {
@@ -71,9 +73,6 @@ public class CommandProcessor implements CommandExecutor {
             return this.invokeCommand(context, bundle, params);
         } catch(CommandUsageException ex) {
             return ex.getCommandResponse();
-        } catch(InternalCommandException ex) {
-            ex.getException().printStackTrace();
-            return ScaffiPlugin.config.getMessages().getServerError();
         } catch (Exception ex) {
             ex.printStackTrace();
             return ScaffiPlugin.config.getMessages().getServerError();

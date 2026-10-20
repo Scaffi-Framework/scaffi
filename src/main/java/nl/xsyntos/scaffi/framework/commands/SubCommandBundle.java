@@ -24,9 +24,11 @@ import nl.xsyntos.scaffi.framework.exceptions.InternalCommandException;
 public class SubCommandBundle {
     private SubCommand subCommand;
     private Method method;
+
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private ParameterInfo[] parameters;
+    
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private long converterRevision;
