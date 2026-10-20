@@ -5,17 +5,71 @@ import java.lang.reflect.Parameter;
 
 import org.bukkit.command.CommandSender;
 
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import nl.xsyntos.scaffi.framework.commands.annotations.Async;
+import nl.xsyntos.scaffi.framework.commands.annotations.CommandNullable;
 import nl.xsyntos.scaffi.framework.commands.annotations.SubCommand;
+import nl.xsyntos.scaffi.framework.commands.annotations.TabOverwrite;
+import nl.xsyntos.scaffi.framework.commands.converters.IConverter;
 import nl.xsyntos.scaffi.framework.exceptions.InternalCommandException;
 
 @Data
-@AllArgsConstructor
+@EqualsAndHashCode(of = {"subCommand", "method"})
+@ToString(of = {"subCommand", "method"})
 public class SubCommandBundle {
     private SubCommand subCommand;
     private Method method;
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private ParameterInfo[] parameters;
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private long converterRevision;
+
+    /** Metadata resolved once when the command method is assigned. */
+    public record ParameterInfo(Parameter parameter, IConverter<?> converter,
+                                boolean optional, TabOverwrite tabOverwrite) {}
+
+    public SubCommandBundle(SubCommand subCommand, Method method) {
+        this.subCommand = subCommand;
+        updateMethod(method);
+    }
+
+    public void setMethod(Method method) {
+        updateMethod(method);
+    }
+
+    private void updateMethod(Method method) {
+        this.method = method;
+        this.converterRevision = ConverterRegistry.getRevision();
+        Parameter[] methodParameters = method == null ? new Parameter[0] : method.getParameters();
+        this.parameters = new ParameterInfo[methodParameters.length];
+        for (int i = 0; i < methodParameters.length; i++) {
+            Parameter parameter = methodParameters[i];
+            parameters[i] = new ParameterInfo(parameter, ConverterRegistry.getConverter(parameter.getType()),
+                parameter.isAnnotationPresent(CommandNullable.class), parameter.getAnnotation(TabOverwrite.class));
+        }
+    }
+
+    public int getParameterCount() {
+        return parameters.length;
+    }
+
+    public ParameterInfo getParameterInfo(int index) {
+        return parameters[index];
+    }
+
+    public IConverter<?> getConverter(int index) {
+        ParameterInfo info = parameters[index];
+        if (converterRevision == ConverterRegistry.getRevision() && info.converter() != null)
+            return info.converter();
+        return ConverterRegistry.getConverter(info.parameter().getType());
+    }
 
     public boolean isRoot() {
         return subCommand.command().isBlank();
@@ -40,7 +94,10 @@ public class SubCommandBundle {
     }
 
     public Parameter[] getParameters() {
-        return method.getParameters();
+        Parameter[] copy = new Parameter[parameters.length];
+        for (int i = 0; i < parameters.length; i++)
+            copy[i] = parameters[i].parameter();
+        return copy;
     }
 
     public boolean executorAllowed(CommandSender sender) {

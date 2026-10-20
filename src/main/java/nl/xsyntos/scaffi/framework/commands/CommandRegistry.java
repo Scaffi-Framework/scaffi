@@ -32,7 +32,12 @@ public class CommandRegistry {
 
         String packageName = clazz.getPackage().getName();
 
-        for(ClassPath.ClassInfo info : cp.getTopLevelClassesRecursive(packageName)) {
+        registerCommands(plugin, cp.getTopLevelClassesRecursive(packageName));
+    }
+
+    /** Register commands from an already discovered set of plugin classes. */
+    public static void registerCommands(JavaPlugin plugin, Iterable<ClassPath.ClassInfo> classes) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        for(ClassPath.ClassInfo info : classes) {
             Class<?> cls = info.load();
             if(cls.isAnnotationPresent(Command.class)) {
                 Command command = cls.getAnnotation(Command.class);
@@ -53,13 +58,14 @@ public class CommandRegistry {
                     validateMethod(method);
 
                     SubCommand subCommand = method.getAnnotation(SubCommand.class);
+                    SubCommandBundle bundle = new SubCommandBundle(subCommand, method);
                     if(!subCommands.containsKey(subCommand.command())) 
-                        subCommands.put(subCommand.command(), new SubCommandBundle(subCommand, method));
+                        subCommands.put(subCommand.command(), bundle);
                     else
                         throw new ScaffiStartupError(String.format("Duplicate subcommand %s in class %s", subCommand.command(), clazz.getName()));
                     for(String alias : subCommand.aliases()) {
                         if(!subCommands.containsKey(alias)) 
-                            subCommands.put(alias, new SubCommandBundle(subCommand, method));
+                            subCommands.put(alias, bundle);
                         else
                             throw new ScaffiStartupError(String.format("Duplicate subcommand %s in class %s", alias, clazz.getName()));
                     }

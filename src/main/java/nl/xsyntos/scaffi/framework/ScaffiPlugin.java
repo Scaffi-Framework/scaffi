@@ -5,6 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.google.common.reflect.ClassPath;
+
 import nl.xsyntos.scaffi.framework.commands.CommandRegistry;
 import nl.xsyntos.scaffi.framework.commands.ConverterRegistry;
 import nl.xsyntos.scaffi.framework.configuration.ScaffiMainConfig;
@@ -23,8 +25,10 @@ public class ScaffiPlugin {
     public static void enable(JavaPlugin basePlugin) {
             try {
                 ScaffiPlugin.config.setPlugin(basePlugin);
-                ConverterRegistry.registerConverters(basePlugin);
-                CommandRegistry.registerCommands(basePlugin);
+                var classes = ClassPath.from(basePlugin.getClass().getClassLoader())
+                    .getTopLevelClassesRecursive(basePlugin.getClass().getPackageName());
+                ConverterRegistry.registerConverters(classes);
+                CommandRegistry.registerCommands(basePlugin, classes);
             } catch (InstantiationException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {

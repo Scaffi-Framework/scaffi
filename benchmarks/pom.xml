@@ -1,0 +1,19 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>bench</groupId><artifactId>scaffi-benchmark</artifactId><version>1.0</version>
+  <properties><maven.compiler.release>21</maven.compiler.release><project.build.sourceEncoding>UTF-8</project.build.sourceEncoding><spigot.version>1.21.11-R0.1-20251231.154832-9</spigot.version></properties>
+  <repositories><repository><id>spigot</id><url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url></repository></repositories>
+  <dependencies>
+    <dependency><groupId>bench</groupId><artifactId>scaffi</artifactId><version>1</version><scope>system</scope><systemPath>${scaffi.jar}</systemPath></dependency>
+    <dependency><groupId>org.spigotmc</groupId><artifactId>spigot-api</artifactId><version>${spigot.version}</version></dependency>
+    <dependency><groupId>org.openjdk.jmh</groupId><artifactId>jmh-core</artifactId><version>1.37</version></dependency>
+    <dependency><groupId>org.openjdk.jmh</groupId><artifactId>jmh-generator-annprocess</artifactId><version>1.37</version><scope>provided</scope></dependency>
+  </dependencies>
+  <build><plugins>
+    <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.13.0</version></plugin>
+    <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-shade-plugin</artifactId><version>3.6.0</version><executions><execution><phase>package</phase><goals><goal>shade</goal></goals><configuration>
+      <finalName>benchmarks</finalName><createDependencyReducedPom>false</createDependencyReducedPom>
+      <filters><filter><artifact>*:*</artifact><excludes><exclude>META-INF/*.SF</exclude><exclude>META-INF/*.DSA</exclude><exclude>META-INF/*.RSA</exclude></excludes></filter></filters>
+    </configuration></execution></executions></plugin>
+  </plugins></build>
+</project>
