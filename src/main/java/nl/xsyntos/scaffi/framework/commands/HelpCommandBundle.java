@@ -14,6 +14,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import nl.xsyntos.scaffi.framework.commands.annotations.CommandNullable;
 import nl.xsyntos.scaffi.framework.commands.annotations.HelpCommand;
 import nl.xsyntos.scaffi.framework.commands.annotations.SubCommand;
 import nl.xsyntos.scaffi.framework.commands.converters.IConverter;
@@ -137,7 +138,7 @@ public class HelpCommandBundle extends SubCommandBundle {
     }
 
     private BaseComponent transformParam(Parameter param) {
-        boolean isOptional = param.isAnnotationPresent(Nullable.class);
+        boolean isOptional = param.isAnnotationPresent(CommandNullable.class);
         IConverter<?> c = ConverterRegistry.getConverter(param.getType());
         String typeName = c != null ? c.getTypeName() : param.getType().getSimpleName();
 
