@@ -6,6 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.bukkit.command.CommandSender;
+
 /**
  * An annotation to register a Java Class as a Minecraft SubCommand
  */
@@ -32,4 +34,14 @@ public @interface SubCommand {
      * Determine whether to permit command argument overflow
      */
     boolean allowExtraArgs() default true;
+
+    /**
+     * A whitelist of CommandExecutors that are allowed to execute this command. By default all CommandExecutors are allowed.
+     */
+    Class<? extends CommandSender>[] executorWhitelist() default {CommandSender.class};
+
+    /** 
+     * A class that provides a CommandResponse when there is unhandled exception while executing the command. By default, it uses the DefaultErrorResponder, which sends a generic error message.
+    */
+    Class<? extends ICommandResponder> errorResponse() default DefaultErrorResponder.class;
 }

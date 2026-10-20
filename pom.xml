@@ -35,9 +35,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <revision>0.1.1-${MINECRAFT_VERSION}</revision>
+    <revision>0.2.1-${MINECRAFT_VERSION}</revision>
     <MINECRAFT_VERSION>1.21.11</MINECRAFT_VERSION>
-    <MINECRAFT_TIMESTAMP>20251212.220009-4</MINECRAFT_TIMESTAMP>
+    <MINECRAFT_TIMESTAMP>20251231.154832-9</MINECRAFT_TIMESTAMP>
     <gpg.keyname>CBF9D0731D9AFA8F45821F858236D7A25C0CCC62</gpg.keyname>
   </properties>
   <repositories>
@@ -63,6 +63,12 @@
         <groupId>org.jetbrains</groupId>
         <artifactId>annotations</artifactId>
         <version>24.1.0</version>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.13.2</version>
+        <scope>test</scope>
       </dependency>
   </dependencies>
   <build>

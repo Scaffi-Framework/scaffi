@@ -14,3 +14,6 @@ libraries
 cache
 logs
 versions
+/benchmark-results/
+/benchmarks/target/
+__pycache__/

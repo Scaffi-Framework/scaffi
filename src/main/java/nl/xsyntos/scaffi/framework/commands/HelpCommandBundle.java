@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -14,6 +15,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import nl.xsyntos.scaffi.framework.commands.annotations.CommandNullable;
 import nl.xsyntos.scaffi.framework.commands.annotations.HelpCommand;
 import nl.xsyntos.scaffi.framework.commands.annotations.SubCommand;
 import nl.xsyntos.scaffi.framework.commands.converters.IConverter;
@@ -66,11 +68,14 @@ public class HelpCommandBundle extends SubCommandBundle {
     private List<BaseComponent> generateHelpComponents(String command, Map<String, SubCommandBundle> subCommands, HelpCommand helpCommand) {
         List<BaseComponent> helpComponents = new ArrayList<>();
         //generate help components for for all subcommands, split into pages of ENTRIES_PER_PAGE
-        Collection<SubCommandBundle> bundles = subCommands.values();
+        Map<Method, SubCommandBundle> uniqueCommands = new LinkedHashMap<>();
+        for (SubCommandBundle bundle : subCommands.values())
+            uniqueCommands.putIfAbsent(bundle.getMethod(), bundle);
+        List<SubCommandBundle> bundles = new ArrayList<>(uniqueCommands.values());
         int totalPages = (int) Math.ceil((double) bundles.size() / helpCommand.entriesPerPage());
         for(int page = 0; page < totalPages; page++) {
             int startIndex = page * helpCommand.entriesPerPage();
-            List<SubCommandBundle> pageBundles = bundles.stream().skip(startIndex).limit(helpCommand.entriesPerPage()).toList();
+            List<SubCommandBundle> pageBundles = bundles.subList(startIndex, Math.min(startIndex + helpCommand.entriesPerPage(), bundles.size()));
             BaseComponent helpComponent = generateHelpComponent(pageBundles, command, page + 1, page == 0, page == totalPages - 1, helpCommand);
             helpComponents.add(helpComponent);
         }
@@ -137,7 +142,7 @@ public class HelpCommandBundle extends SubCommandBundle {
     }
 
     private BaseComponent transformParam(Parameter param) {
-        boolean isOptional = param.isAnnotationPresent(Nullable.class);
+        boolean isOptional = param.isAnnotationPresent(CommandNullable.class);
         IConverter<?> c = ConverterRegistry.getConverter(param.getType());
         String typeName = c != null ? c.getTypeName() : param.getType().getSimpleName();
 

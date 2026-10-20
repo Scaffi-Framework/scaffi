@@ -9,12 +9,15 @@ import java.util.HashMap;
 import org.jetbrains.annotations.Nullable;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.google.common.reflect.ClassPath;
 
 import nl.xsyntos.scaffi.framework.commands.annotations.Command;
+import nl.xsyntos.scaffi.framework.commands.annotations.DefaultErrorResponder;
 import nl.xsyntos.scaffi.framework.commands.annotations.HelpCommand;
+import nl.xsyntos.scaffi.framework.commands.annotations.ICommandResponder;
 import nl.xsyntos.scaffi.framework.commands.annotations.SubCommand;
 import nl.xsyntos.scaffi.framework.commands.processors.CommandProcessor;
 import nl.xsyntos.scaffi.framework.commands.processors.TabProcessor;
@@ -29,7 +32,12 @@ public class CommandRegistry {
 
         String packageName = clazz.getPackage().getName();
 
-        for(ClassPath.ClassInfo info : cp.getTopLevelClassesRecursive(packageName)) {
+        registerCommands(plugin, cp.getTopLevelClassesRecursive(packageName));
+    }
+
+    /** Register commands from an already discovered set of plugin classes. */
+    public static void registerCommands(JavaPlugin plugin, Iterable<ClassPath.ClassInfo> classes) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        for(ClassPath.ClassInfo info : classes) {
             Class<?> cls = info.load();
             if(cls.isAnnotationPresent(Command.class)) {
                 Command command = cls.getAnnotation(Command.class);
@@ -50,13 +58,14 @@ public class CommandRegistry {
                     validateMethod(method);
 
                     SubCommand subCommand = method.getAnnotation(SubCommand.class);
+                    SubCommandBundle bundle = new SubCommandBundle(subCommand, method);
                     if(!subCommands.containsKey(subCommand.command())) 
-                        subCommands.put(subCommand.command(), new SubCommandBundle(subCommand, method));
+                        subCommands.put(subCommand.command(), bundle);
                     else
                         throw new ScaffiStartupError(String.format("Duplicate subcommand %s in class %s", subCommand.command(), clazz.getName()));
                     for(String alias : subCommand.aliases()) {
                         if(!subCommands.containsKey(alias)) 
-                            subCommands.put(alias, new SubCommandBundle(subCommand, method));
+                            subCommands.put(alias, bundle);
                         else
                             throw new ScaffiStartupError(String.format("Duplicate subcommand %s in class %s", alias, clazz.getName()));
                     }
@@ -136,6 +145,16 @@ public class CommandRegistry {
             @Override
             public boolean allowExtraArgs() {
                 return false;
+            }
+
+            @Override
+            public Class<? extends CommandSender>[] executorWhitelist() {
+                return new Class[] {CommandSender.class};
+            }
+
+            @Override
+            public Class<? extends ICommandResponder> errorResponse() {
+                return DefaultErrorResponder.class;
             }
         };
 

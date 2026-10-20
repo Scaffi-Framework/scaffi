@@ -9,9 +9,7 @@ import lombok.AllArgsConstructor;
 import nl.xsyntos.scaffi.framework.ScaffiPlugin;
 import nl.xsyntos.scaffi.framework.commands.CommandContext;
 import nl.xsyntos.scaffi.framework.commands.CommandResponse;
-import nl.xsyntos.scaffi.framework.commands.ConverterRegistry;
 import nl.xsyntos.scaffi.framework.commands.SubCommandBundle;
-import nl.xsyntos.scaffi.framework.commands.annotations.CommandNullable;
 import nl.xsyntos.scaffi.framework.commands.converters.IConverter;
 import nl.xsyntos.scaffi.framework.exceptions.CommandUsageException;
 import nl.xsyntos.scaffi.framework.exceptions.InternalCommandException;
@@ -20,12 +18,7 @@ import nl.xsyntos.scaffi.framework.exceptions.UnableConvertException;
 import java.lang.reflect.Parameter;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -52,15 +45,20 @@ public class CommandProcessor implements CommandExecutor {
 
         if(bundle == null)
             return ScaffiPlugin.config.getMessages().getInvalidUsage();
-        
+
+        if(!bundle.executorAllowed(context.getSender()))
+            return ScaffiPlugin.config.getMessages().getExecutorNotAllowed();
+
         if(bundle.isAsync()) {
             CompletableFuture<CommandResponse> future = new CompletableFuture<>();
             Bukkit.getScheduler().runTaskAsynchronously(ScaffiPlugin.config.getPlugin(), () -> {
                 future.complete(this.executeSubCommand(context, bundle));
             });
+
             future.thenAccept((response) -> {
                 Bukkit.getScheduler().runTask(ScaffiPlugin.config.getPlugin(), () -> response.send(context));
             });
+            
             return bundle.getAsyncResponse(context);
 
         } else {
@@ -71,13 +69,10 @@ public class CommandProcessor implements CommandExecutor {
 
     private CommandResponse executeSubCommand(CommandContext context, SubCommandBundle bundle) {
         try {
-            List<Object> params = this.convertParamsForSubCommand(context, bundle);
+            Object[] params = this.convertParamsForSubCommand(context, bundle);
             return this.invokeCommand(context, bundle, params);
         } catch(CommandUsageException ex) {
             return ex.getCommandResponse();
-        } catch(InternalCommandException ex) {
-            ex.getException().printStackTrace();
-            return ScaffiPlugin.config.getMessages().getServerError();
         } catch (Exception ex) {
             ex.printStackTrace();
             return ScaffiPlugin.config.getMessages().getServerError();
@@ -96,14 +91,16 @@ public class CommandProcessor implements CommandExecutor {
         return subCommand;
     }
 
-    private List<Object> convertParamsForSubCommand(CommandContext context, SubCommandBundle subCommand) throws UnableConvertException, CommandUsageException {
-        ArrayList<Object> params = new ArrayList<>();
+    private Object[] convertParamsForSubCommand(CommandContext context, SubCommandBundle subCommand) throws UnableConvertException, CommandUsageException {
+        Object[] params = new Object[subCommand.getParameterCount()];
+        params[0] = context;
         int currentArg = subCommand.isRoot() ? 0 : 1;
 
-        for(int i = 1; i < subCommand.getMethod().getParameters().length; i++) {
+        for(int i = 1; i < subCommand.getParameterCount(); i++) {
             //get the converter for the parameter
-            Parameter param = subCommand.getMethod().getParameters()[i];
-            IConverter<?> converter = ConverterRegistry.getConverter(param.getType());
+            var info = subCommand.getParameterInfo(i);
+            Parameter param = info.parameter();
+            IConverter<?> converter = subCommand.getConverter(i);
 
             if(converter == null) {
                 throw new InternalCommandException(
@@ -115,19 +112,20 @@ public class CommandProcessor implements CommandExecutor {
 
             try {
                 if(converter.getSize() == 1) {
-                    params.add(converter.convert(context, context.getArgs()[currentArg]));
+                    params[i] = converter.convert(context, context.getArgs()[currentArg]);
                 } else {
-                    String value = "";
+                    StringBuilder value = new StringBuilder();
                     for(int j = 0; j < converter.getSize(); j++) {
-                        value += context.getArgs()[currentArg + j] + " ";
+                        if (j > 0) value.append(' ');
+                        value.append(context.getArgs()[currentArg + j]);
                     }
-                    params.add(converter.convert(context, value.trim()));
+                    params[i] = converter.convert(context, value.toString().trim());
                 }
 
                 currentArg += converter.getSize();
             } catch (ArrayIndexOutOfBoundsException e) {
-                if(param.isAnnotationPresent(CommandNullable.class)) {
-                    params.add(null); 
+                if(info.optional()) {
+                    params[i] = null;
                 } else {
                     throw new CommandUsageException("Missing param", ScaffiPlugin.config.getMessages().getInvalidUsage());
                 }
@@ -144,15 +142,13 @@ public class CommandProcessor implements CommandExecutor {
         return params;
     }
 
-    private CommandResponse invokeCommand(CommandContext context, SubCommandBundle bundle, List<Object> params) {
+    private CommandResponse invokeCommand(CommandContext context, SubCommandBundle bundle, Object[] params) {
         if(bundle.getSubCommand().permission().isEmpty() || context.getSender().hasPermission(bundle.getSubCommand().permission())) {
             try {
-                //add context as first parameter
-                params.add(0, context);
-                return (CommandResponse) bundle.invoke(instance, params.toArray());
+                return bundle.invoke(instance, params);
             } catch (Exception e) {
                 e.printStackTrace();
-                return ScaffiPlugin.config.getMessages().getServerError();
+                return bundle.getErrorResponse(context);
             }
         } else {
             return ScaffiPlugin.config.getMessages().getNoPermissions();

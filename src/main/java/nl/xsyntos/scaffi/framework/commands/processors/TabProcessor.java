@@ -12,7 +12,6 @@ import org.bukkit.command.TabCompleter;
 
 import lombok.AllArgsConstructor;
 import nl.xsyntos.scaffi.framework.commands.CommandContext;
-import nl.xsyntos.scaffi.framework.commands.ConverterRegistry;
 import nl.xsyntos.scaffi.framework.commands.SubCommandBundle;
 import nl.xsyntos.scaffi.framework.commands.annotations.TabOverwrite;
 import nl.xsyntos.scaffi.framework.commands.converters.IConverter;
@@ -24,11 +23,9 @@ public class TabProcessor implements TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender arg0, org.bukkit.command.Command arg1, String arg2, String[] arg3) {
-        CommandContext context = new CommandContext(arg0, arg3, arg2);
-        List<String> list = findAndExecuteTabComplete(context);
-        
-        list.removeIf(s -> !s.toLowerCase().startsWith(arg3[arg3.length - 1].toLowerCase()));
-        return list;
+        if (arg3.length == 0)
+            return Collections.emptyList();
+        return findAndExecuteTabComplete(new CommandContext(arg0, arg3, arg2));
     }
 
     private List<String> findAndExecuteTabComplete(CommandContext context) {
@@ -36,6 +33,7 @@ public class TabProcessor implements TabCompleter {
             return Collections.emptyList();
         
         ArrayList<String> list = new ArrayList<>();
+        String prefix = context.getArgs()[context.getArgs().length - 1];
 
         SubCommandBundle subCommand = null;
         if(context.getArgs().length > 0 && !context.getArgs()[0].isEmpty()) 
@@ -46,23 +44,30 @@ public class TabProcessor implements TabCompleter {
             subCommand = subCommands.get("");
 
         if(subCommand != null)
-            list.addAll(executeTabComplete(context, subCommand, usingDefault));
+            addMatching(list, executeTabComplete(context, subCommand, usingDefault), prefix);
 
         if(context.getArgs().length == 1) {
-            list.addAll(subCommands.keySet());
+            addMatching(list, subCommands.keySet(), prefix);
         }
 
-        list.removeIf(i -> !i.toLowerCase().startsWith(context.getArgs()[context.getArgs().length - 1].toLowerCase()));
         return list;
+    }
+
+    private void addMatching(List<String> result, Iterable<String> candidates, String prefix) {
+        for (String candidate : candidates) {
+            if (candidate.regionMatches(true, 0, prefix, 0, prefix.length()))
+                result.add(candidate);
+        }
     }
 
     private List<String> executeTabComplete(CommandContext context, SubCommandBundle subCommand, boolean usingDefault) {
         int currentArg = usingDefault ? 0 : 1;
 
-        for(int i = 1; i < subCommand.getParameters().length; i++) {
+        for(int i = 1; i < subCommand.getParameterCount(); i++) {
             //get the converter for the parameter
-            Parameter param = subCommand.getParameters()[i];
-            IConverter<?> converter = ConverterRegistry.getConverter(param.getType());
+            var info = subCommand.getParameterInfo(i);
+            Parameter param = info.parameter();
+            IConverter<?> converter = subCommand.getConverter(i);
 
             if(converter == null) {
                 Bukkit.getLogger().warning(String.format("Method %s has a parameter of type %s which does not have a converter", subCommand.getMethod().getName(), param.getType().getName()));
@@ -71,7 +76,7 @@ public class TabProcessor implements TabCompleter {
 
             currentArg += converter.getSize();
             if(currentArg >= context.getArgs().length) {
-                TabOverwrite overwrite = param.getAnnotation(TabOverwrite.class);
+                TabOverwrite overwrite = info.tabOverwrite();
 
                 if(overwrite == null) {
                     return converter.tabComplete(context, context.getArgs()[context.getArgs().length - 1], context.getArgs().length - (currentArg - converter.getSize()) - 1);

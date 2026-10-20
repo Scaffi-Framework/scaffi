@@ -35,13 +35,17 @@ jobs:
       MAVEN_SERVER: central
     strategy:
       matrix:
-        INCLUDE:
+        include:
           - MINECRAFT_VERSION: '1.21.11'
-            MINECRAFT_TIMESTAMP: '20251212.220009-4'
+            MINECRAFT_TIMESTAMP: '20251231.154832-9'
           - MINECRAFT_VERSION: '1.20.6'
             MINECRAFT_TIMESTAMP: '20240613.150924-57'
           - MINECRAFT_VERSION: '1.19.4'
             MINECRAFT_TIMESTAMP: '20230607.155743-88'
+          - MINECRAFT_VERSION: '26.1.2'
+            MINECRAFT_TIMESTAMP: '20260616.152059-13'
+          - MINECRAFT_VERSION: '26.2'
+            MINECRAFT_TIMESTAMP: '20260915.151451-13'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,7 +71,7 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           MAVEN_SERVER: central
       - name: 🍵Publish package
-        run: mvn --batch-mode deploy -Dgpg.passphrase="${GPG_PASSPHRASE}" --settings ./.m2/settings.xml
+        run: mvn --batch-mode deploy -Dgpg.passphrase="${GPG_PASSPHRASE}"   -DMINECRAFT_VERSION="${{ matrix.MINECRAFT_VERSION }}" -DMINECRAFT_TIMESTAMP="${{ matrix.MINECRAFT_TIMESTAMP }}" --settings ./.m2/settings.xml
 
   deploy-github-pages:
     needs: build

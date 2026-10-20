@@ -1,0 +1,88 @@
+name: Optional PR benchmark
+run-name: 'Benchmark PR #${{ github.event.pull_request.number || inputs.pull_request }}'
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: Pull request number to compare against its base
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: benchmark-pr-${{ github.event.pull_request.number || inputs.pull_request }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'benchmark')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Resolve comparison commits
+        id: comparison
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ inputs.pull_request }}
+        with:
+          script: |
+            let pr = context.payload.pull_request;
+            if (!pr) {
+              const value = process.env.PR_NUMBER;
+              if (!/^[1-9][0-9]*$/.test(value || '') || !Number.isSafeInteger(Number(value))) {
+                throw new Error('Enter a positive pull request number.');
+              }
+              ({ data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: Number(value)
+              }));
+            }
+            core.setOutput('number', String(pr.number));
+            core.setOutput('base', pr.base.sha);
+            core.setOutput('head', pr.head.sha);
+      - name: Checkout pull request and comparison history
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ steps.comparison.outputs.number }}/head
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: |
+            pom.xml
+            benchmarks/pom.xml
+      - name: Test result reporting
+        run: python3 -m unittest discover -s benchmarks/tests -v
+      - name: Compare base and head
+        env:
+          BASE_SHA: ${{ steps.comparison.outputs.base }}
+          HEAD_SHA: ${{ steps.comparison.outputs.head }}
+        run: bash benchmarks/run.sh "$BASE_SHA" "$HEAD_SHA" "$GITHUB_WORKSPACE/benchmark-results"
+      - name: Add comparison to run summary
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f benchmark-results/summary.md ]]; then
+            cat benchmark-results/summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Benchmark did not finish. Check the job logs and benchmark artifact for details.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload results and diagnostic logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-pr-${{ steps.comparison.outputs.number }}-${{ github.run_attempt }}
+          path: benchmark-results/
+          if-no-files-found: warn
+          retention-days: 14
