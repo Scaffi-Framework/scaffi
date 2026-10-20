@@ -35,7 +35,7 @@ jobs:
       MAVEN_SERVER: central
     strategy:
       matrix:
-        INCLUDE:
+        include:
           - MINECRAFT_VERSION: '1.21.11'
             MINECRAFT_TIMESTAMP: '20251231.154832-9'
           - MINECRAFT_VERSION: '1.20.6'
@@ -73,7 +73,7 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           MAVEN_SERVER: central
       - name: 🍵Publish package
-        run: mvn --batch-mode deploy -Dgpg.passphrase="${GPG_PASSPHRASE}" --settings ./.m2/settings.xml
+        run: mvn --batch-mode deploy -Dgpg.passphrase="${GPG_PASSPHRASE}"   -DMINECRAFT_VERSION="${{ matrix.MINECRAFT_VERSION }}" -DMINECRAFT_TIMESTAMP="${{ matrix.MINECRAFT_TIMESTAMP }}" --settings ./.m2/settings.xml
 
   deploy-github-pages:
     needs: build
