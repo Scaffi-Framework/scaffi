@@ -14,16 +14,18 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class Vector3 {
-    
-    public static Vector3 ZERO = new Vector3();
-
     private double x;
     private double y;
     private double z;
 
+    public static Vector3 getZero() {
+        return new Vector3(0, 0, 0);
+    }
+
     public Vector3() {
         this(0, 0, 0);
     }
+
 
     public Vector3(Location location) {
         this(location.getX(), location.getY(), location.getZ());
@@ -77,10 +79,15 @@ public class Vector3 {
      * normalizes the vector, which means the vector will get a length of one
      */
     public void normalize() {
-        double total = this.x + this.y + this.z;
-        this.x /= total;
-        this.y /= total;
-        this.z /= total;
+        double length = this.length();
+
+        if (length == 0.0) {
+            return;
+        }
+
+        this.x /= length;
+        this.y /= length;
+        this.z /= length;
     }
 
     /**
@@ -160,29 +167,31 @@ public class Vector3 {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof Vector3) {
-            Vector3 vector = (Vector3)obj;
-            return this.x == vector.x && this.y == vector.y && this.z == vector.z; 
+        if (this == obj) {
+            return true;
         }
-        return false;
+
+        if (!(obj instanceof Vector3 vector)) {
+            return false;
+        }
+
+        return Double.compare(this.x == 0.0 ? 0.0 : this.x, vector.x == 0.0 ? 0.0 : vector.x) == 0
+            && Double.compare(this.y == 0.0 ? 0.0 : this.y, vector.y == 0.0 ? 0.0 : vector.y) == 0
+            && Double.compare(this.z == 0.0 ? 0.0 : this.z, vector.z == 0.0 ? 0.0 : vector.z) == 0;
     }
 
     @Override
     public int hashCode() {
-        return this.toString().hashCode();
+        return java.util.Objects.hash(
+            x == 0.0 ? 0.0 : x,
+            y == 0.0 ? 0.0 : y,
+            z == 0.0 ? 0.0 : z
+        );
     }
 
     @Override
     public String toString() {
         return "[" + this.x + ", " + this.y + ", " + this.z + "]";
-    }
-
-    /**
-     * gets an location based on the vector's position, where the world is the overworld
-     * @return the location from this vector
-     */
-    public Location toLocation() {
-        return toLocation(Bukkit.getWorlds().get(0));
     }
 
     /**
