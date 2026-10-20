@@ -17,13 +17,25 @@ import nl.xsyntos.scaffi.framework.configuration.Vector3;
 public class ConverterRegistry {
     private static final Map<Class<?>, IConverter<?>> converters = new HashMap<>();
 
+    private static long revision;
+
+    public static long getRevision() {
+        return revision;
+    }
+
     public static void registerConverters(JavaPlugin plugin) throws IOException {
-        registerPredefinedConverters();
         Class<? extends JavaPlugin> clazz = plugin.getClass();
         ClassPath cp = ClassPath.from(clazz.getClassLoader());
 
         String packageName = clazz.getPackage().getName();
-        for (ClassPath.ClassInfo info : cp.getTopLevelClassesRecursive(packageName)) {
+        registerConverters(cp.getTopLevelClassesRecursive(packageName));
+    }
+
+    /** Register converters from an already discovered set of plugin classes. */
+    public static void registerConverters(Iterable<ClassPath.ClassInfo> classes) {
+        revision++;
+        registerPredefinedConverters();
+        for (ClassPath.ClassInfo info : classes) {
             Class<?> cls = info.load();
             if (IConverter.class.isAssignableFrom(cls)) {
                 try {

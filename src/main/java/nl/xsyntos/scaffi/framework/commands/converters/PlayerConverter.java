@@ -1,6 +1,7 @@
 package nl.xsyntos.scaffi.framework.commands.converters;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -26,7 +27,13 @@ public class PlayerConverter implements IConverter<Player> {
 
     @Override
     public List<String> tabComplete(CommandContext context, String value, int currentParam) {
-        return Bukkit.getServer().getOnlinePlayers().stream().map(Player::getName).toList();
+        List<String> matches = new ArrayList<>();
+        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+            String name = player.getName();
+            if (name.regionMatches(true, 0, value, 0, value.length()))
+                matches.add(name);
+        }
+        return matches;
     }
     
     @Override
