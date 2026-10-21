@@ -28,10 +28,6 @@ public class SubCommandBundle {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private ParameterInfo[] parameters;
-    
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private long converterRevision;
 
     /** Metadata resolved once when the command method is assigned. */
     public record ParameterInfo(Parameter parameter, IConverter<?> converter,
@@ -48,7 +44,6 @@ public class SubCommandBundle {
 
     private void updateMethod(Method method) {
         this.method = method;
-        this.converterRevision = ConverterRegistry.getRevision();
         Parameter[] methodParameters = method == null ? new Parameter[0] : method.getParameters();
         this.parameters = new ParameterInfo[methodParameters.length];
         for (int i = 0; i < methodParameters.length; i++) {
@@ -68,8 +63,6 @@ public class SubCommandBundle {
 
     public IConverter<?> getConverter(int index) {
         ParameterInfo info = parameters[index];
-        if (converterRevision == ConverterRegistry.getRevision() && info.converter() != null)
-            return info.converter();
         return ConverterRegistry.getConverter(info.parameter().getType());
     }
 
